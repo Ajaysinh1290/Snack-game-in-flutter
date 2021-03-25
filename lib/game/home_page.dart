@@ -5,6 +5,7 @@ import 'package:snack_game/database/resume_game_db.dart';
 import 'package:snack_game/database/score_db.dart';
 import 'package:snack_game/game/game_screen.dart';
 import 'package:snack_game/game/score_screen.dart';
+import 'package:snack_game/game/settings_screen.dart';
 import 'package:snack_game/utils/color_pallette.dart';
 import 'package:snack_game/widgets/my_button.dart';
 
@@ -98,7 +99,9 @@ class _HomePageState extends State<HomePage> {
               textColor: Colors.black,
               width: 200,
               height: 50,
-              onPressed: null,
+              onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>SettingsScreen()));
+              },
             ),
           ),
         ],
