@@ -3,10 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:snack_game/database/database_constants.dart';
 import 'package:snack_game/database/resume_game_db.dart';
 import 'package:snack_game/database/score_db.dart';
+import 'package:snack_game/database/settings_db.dart';
 import 'package:snack_game/game/game_screen.dart';
 import 'package:snack_game/game/score_screen.dart';
 import 'package:snack_game/game/settings_screen.dart';
 import 'package:snack_game/utils/color_pallette.dart';
+import 'package:snack_game/utils/settings.dart';
 import 'package:snack_game/widgets/my_button.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,23 +17,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Map<String, dynamic>> data;
+  List<Map<String, dynamic>> resumeGameData;
+  List<Map<String, dynamic>> settingsData;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    restorePreviousData();
+    fetchPreviousData();
   }
 
-  restorePreviousData() async {
-    data = await ResumeGameDb.queryAll();
+  fetchPreviousData() async {
+    resumeGameData = await ResumeGameDb.queryAll();
+    settingsData = await SettingsDb.queryAll();
+    if (settingsData != null && settingsData.isNotEmpty) {
+      Settings.fromJson(settingsData.first);
+    } else {
+      Settings.setDefaultData();
+      await SettingsDb.insert(Settings.toJson());
+    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    var time = DataBaseConstants.dateFormat.format(DateTime.now());
-    print(time);
     return Scaffold(
       backgroundColor: ColorPallette.darkBlue,
       body: Column(
@@ -46,7 +55,7 @@ class _HomePageState extends State<HomePage> {
           SizedBox(
             height: 100,
           ),
-          if (data != null && data.isNotEmpty)
+          if (resumeGameData != null && resumeGameData.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: MyButton('Resume',
@@ -60,7 +69,7 @@ class _HomePageState extends State<HomePage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => GameScreen(
-                              data: data,
+                              data: resumeGameData,
                             )));
               }),
             ),
@@ -87,7 +96,8 @@ class _HomePageState extends State<HomePage> {
               height: 50,
               onPressed: () async {
                 var data = await ScoreDb.queryAll();
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>ScoreScreen()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => ScoreScreen()));
               },
             ),
           ),
@@ -99,8 +109,9 @@ class _HomePageState extends State<HomePage> {
               textColor: Colors.black,
               width: 200,
               height: 50,
-              onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>SettingsScreen()));
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => SettingsScreen()));
               },
             ),
           ),

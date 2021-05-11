@@ -50,18 +50,23 @@ class _ScoreScreenState extends State<ScoreScreen> {
         backgroundColor: ColorPallette.canvasColor,
       ),
       body: scoreData == null
-          ? Center(child: CircularProgressIndicator(valueColor:  new AlwaysStoppedAnimation<Color>(Colors.white),))
+          ? Center(
+              child: CircularProgressIndicator(
+              valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+            ))
           : ListView.builder(
               itemCount: scoreData.length,
               itemBuilder: (context, index) {
                 bool isHighest = scoreData[index]["score"] == maximum;
-
                 return Container(
                   margin: EdgeInsets.all(10.0),
                   padding: EdgeInsets.all(15.0),
                   decoration: BoxDecoration(
                       border: Border.all(
-                          color: isHighest?Colors.cyan[200]:ColorPallette.canvasBorderColor, width: 1),
+                          color: isHighest
+                              ? Colors.cyan[200]
+                              : ColorPallette.canvasBorderColor,
+                          width: 1),
                       borderRadius: BorderRadius.circular(15.0)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -71,7 +76,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
                         style: GoogleFonts.aBeeZee(
                             fontSize: 14,
                             letterSpacing: 1.5,
-                            color: isHighest?Colors.cyan:Colors.grey[400]),
+                            color: isHighest ? Colors.cyan : Colors.grey[400]),
                       ),
                       SizedBox(
                         width: 15,

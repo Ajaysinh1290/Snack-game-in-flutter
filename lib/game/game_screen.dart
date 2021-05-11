@@ -11,6 +11,7 @@ import 'package:snack_game/database/resume_game_db.dart';
 import 'package:snack_game/database/score_db.dart';
 import 'package:snack_game/game/home_page.dart';
 import 'package:snack_game/painter/my_painter.dart';
+import 'package:snack_game/utils/settings.dart';
 import '../utils/utils.dart';
 
 class GameScreen extends StatefulWidget {
@@ -55,7 +56,7 @@ class _GameScreenState extends State<GameScreen>
     // TODO: implement initState
     super.initState();
     if (widget.data != null && widget.data.isNotEmpty) {
-      restorePreviousData();
+      fetchPreviousData();
       snackHeadX = snackLocations.last.dx.round();
       snackHeadY = snackLocations.last.dy.round();
     } else {
@@ -63,7 +64,8 @@ class _GameScreenState extends State<GameScreen>
     }
 
     move = SnackUtils.snackRectSize;
-
+    delay = (530 - 5 * Settings.speed).round();
+    print('delay : $delay');
     _animationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 200));
     _animationController.forward();
@@ -83,15 +85,14 @@ class _GameScreenState extends State<GameScreen>
   }
 
   storeScore() async {
-    Map<String,dynamic> data = {
-      DataBaseConstants.score : score,
-      DataBaseConstants.date : DataBaseConstants.dateFormat.format(DateTime.now()),
+    Map<String, dynamic> data = {
+      DataBaseConstants.score: score,
+      DataBaseConstants.date:
+          DataBaseConstants.dateFormat.format(DateTime.now()),
     };
-
-    int rowInserted = await ScoreDb.insert(data);
-    print("Row inserted  : $rowInserted");
-
+    await ScoreDb.insert(data);
   }
+
   storeCurrentData() async {
     String direction = left
         ? "left"
@@ -120,7 +121,7 @@ class _GameScreenState extends State<GameScreen>
     // ResumeGameDb.instance.insert(game.toMap());
   }
 
-  restorePreviousData() {
+  fetchPreviousData() {
     String direction;
     widget.data.forEach((value) {
       direction = value[DataBaseConstants.direction];
@@ -160,6 +161,7 @@ class _GameScreenState extends State<GameScreen>
   }
 
   Future<AudioPlayer> playSound() async {
+    if (!Settings.sound) return null;
     AudioCache cache = new AudioCache();
     return await cache.play("hat.mp3");
   }
@@ -260,12 +262,13 @@ class _GameScreenState extends State<GameScreen>
       return;
     }
     if (right && snackLocations.length > 1) {
-      snackHeadY += move;
-      if (!yPoints.contains(snackHeadY)) {
-        snackHeadY -= 2 * move;
-      }
-      snackLocations.add(Offset(snackHeadX.toDouble(), snackHeadY.toDouble()));
-      snackLocations.removeFirst();
+      return;
+      // snackHeadY += move;
+      // if (!yPoints.contains(snackHeadY)) {
+      //   snackHeadY -= 2 * move;
+      // }
+      // snackLocations.add(Offset(snackHeadX.toDouble(), snackHeadY.toDouble()));
+      // snackLocations.removeFirst();
     }
     down = false;
     up = false;
@@ -278,12 +281,13 @@ class _GameScreenState extends State<GameScreen>
       return;
     }
     if (left && snackLocations.length > 1) {
-      snackHeadY -= move;
-      if (!yPoints.contains(snackHeadY)) {
-        snackHeadY += 2 * move;
-      }
-      snackLocations.add(Offset(snackHeadX.toDouble(), snackHeadY.toDouble()));
-      snackLocations.removeFirst();
+      return;
+      // snackHeadY -= move;
+      // if (!yPoints.contains(snackHeadY)) {
+      //   snackHeadY += 2 * move;
+      // }
+      // snackLocations.add(Offset(snackHeadX.toDouble(), snackHeadY.toDouble()));
+      // snackLocations.removeFirst();
     }
     down = false;
     up = false;
@@ -296,12 +300,13 @@ class _GameScreenState extends State<GameScreen>
       return;
     }
     if (down && snackLocations.length > 1) {
-      snackHeadX -= move;
-      if (!xPoints.contains(snackHeadX)) {
-        snackHeadX += 2 * move;
-      }
-      snackLocations.add(Offset(snackHeadX.toDouble(), snackHeadY.toDouble()));
-      snackLocations.removeFirst();
+      return;
+      // snackHeadX -= move;
+      // if (!xPoints.contains(snackHeadX)) {
+      //   snackHeadX += 2 * move;
+      // }
+      // snackLocations.add(Offset(snackHeadX.toDouble(), snackHeadY.toDouble()));
+      // snackLocations.removeFirst();
     }
     down = false;
     up = true;
@@ -314,12 +319,13 @@ class _GameScreenState extends State<GameScreen>
       return;
     }
     if (up && snackLocations.length > 1) {
-      snackHeadX += move;
-      if (!xPoints.contains(snackHeadX)) {
-        snackHeadX -= 2 * move;
-      }
-      snackLocations.add(Offset(snackHeadX.toDouble(), snackHeadY.toDouble()));
-      snackLocations.removeFirst();
+      return;
+      // snackHeadX += move;
+      // if (!xPoints.contains(snackHeadX)) {
+      //   snackHeadX -= 2 * move;
+      // }
+      // snackLocations.add(Offset(snackHeadX.toDouble(), snackHeadY.toDouble()));
+      // snackLocations.removeFirst();
     }
     down = true;
     up = false;
@@ -376,6 +382,7 @@ class _GameScreenState extends State<GameScreen>
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            SizedBox(height: 5,),
             Container(
               decoration: BoxDecoration(
                 color: ColorPallette.canvasColor,
@@ -434,23 +441,24 @@ class _GameScreenState extends State<GameScreen>
                     children: [
                       FlatButton(
                         child: Icon(
-                          isPaused ?Icons.home_filled: Icons.arrow_left ,
+                          isPaused ? Icons.home_filled : Icons.arrow_left,
                           size: controlSize,
                           color: ColorPallette.controlColor,
                         ),
                         onPressed: () {
-                          if(isPaused) {
+                          if (isPaused) {
                             storeCurrentData();
-                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => HomePage()));
                           } else {
                             setState(() {
                               moveLeft();
                             });
                           }
-
                         },
                       ),
-
                       FlatButton(
                         child: Icon(
                           isPaused ? Icons.play_arrow : Icons.pause,
@@ -468,15 +476,16 @@ class _GameScreenState extends State<GameScreen>
                           color: ColorPallette.controlColor,
                         ),
                         onPressed: () {
-
-                          if(isPaused){
-                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>GameScreen()));
-                          }else {
+                          if (isPaused) {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => GameScreen()));
+                          } else {
                             setState(() {
                               moveRight();
                             });
                           }
-
                         },
                       ),
                     ],

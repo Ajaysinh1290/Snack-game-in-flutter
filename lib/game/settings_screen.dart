@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:snack_game/database/settings_db.dart';
 import 'package:snack_game/utils/color_pallette.dart';
+import 'package:snack_game/utils/settings.dart';
+import 'package:snack_game/widgets/settings_tile.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -8,57 +11,231 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ColorPallette.canvasColor,
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(
-            Icons.chevron_left,
-            size: 35,
-            color: Colors.grey[400],
-          ),
-        ),
-        title: Text(
-          'SETTINGS',
-          style: GoogleFonts.aBeeZee(color: Colors.white, letterSpacing: 5),
-        ),
-        elevation: 0,
-        backgroundColor: ColorPallette.canvasColor,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TitleSettings('Snack Color',),
-          TitleSettings('Egg Color'),
-          TitleSettings('Snack Shape'),
-          TitleSettings('Egg Shape'),
-          TitleSettings('Speed'),
-          TitleSettings('Sound')
-        ],
-      ),
-    );
-  }
-}
+  bool sound;
+  bool showLines;
+  String tempSnackColor;
+  String tempEggColor;
+  int speed;
 
-class TitleSettings extends StatelessWidget {
-  final text;
-  TitleSettings(this.text);
+  bool showSnackColorDialog = false;
+  bool showEggColorDialog = false;
+  bool showSpeedDialog = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    tempSnackColor = Settings.snackColor;
+    tempEggColor = Settings.eggColor;
+    speed = Settings.speed;
+    sound = Settings.sound;
+    showLines = Settings.showLines;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 10),
-      child: Text(
-        text,
-        style: GoogleFonts.aBeeZee(
-            fontSize: 20,
-            letterSpacing: 3,
-            color: Colors.grey[200]),
-      ),
-    );
+    print('hash code : ${ColorPallette.canvasColor.hashCode}');
+    return Scaffold(
+        backgroundColor: ColorPallette.canvasColor,
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: Icon(
+              Icons.chevron_left,
+              size: 35,
+              color: Colors.grey[400],
+            ),
+          ),
+          title: Text(
+            'SETTINGS',
+            style: GoogleFonts.aBeeZee(color: Colors.white, letterSpacing: 5),
+          ),
+          actions: [
+            IconButton(
+                icon: Icon(
+                  Icons.done,
+                  size: 26,
+                  color: Colors.white,
+                ),
+                onPressed: () async {
+                  await SettingsDb.deleteAll();
+                  Settings.eggColor = tempEggColor;
+                  Settings.snackColor = tempSnackColor;
+                  Settings.speed = speed;
+                  Settings.showLines = showLines;
+                  Settings.sound = sound;
+                  await SettingsDb.insert(Settings.toJson());
+                  Navigator.pop(context);
+                })
+          ],
+          elevation: 0,
+          backgroundColor: ColorPallette.canvasColor,
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    showSnackColorDialog = !showSnackColorDialog;
+                  });
+                },
+                child: SettingsTile(
+                    text: 'Snack Color',
+                    widget: Container(
+                      width: 20,
+                      height: 20,
+                      color: Color(int.parse(tempSnackColor, radix: 16)),
+                    )),
+              ),
+              if (showSnackColorDialog)
+                Container(
+                    height: 70,
+                    padding: EdgeInsets.all(10.0),
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 10,
+                    ),
+                    decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(15)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(
+                          SnackAndAggColors.colors.length,
+                          (index) => GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    tempSnackColor =
+                                        SnackAndAggColors.colors[index];
+                                    showSnackColorDialog = false;
+                                  });
+                                },
+                                child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  color: Color(int.parse(
+                                      SnackAndAggColors.colors[index],
+                                      radix: 16)),
+                                ),
+                              )),
+                    )),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    showEggColorDialog = !showEggColorDialog;
+                  });
+                },
+                child: SettingsTile(
+                    text: 'Egg Color',
+                    widget: Container(
+                      width: 20,
+                      height: 20,
+                      color: Color(int.parse(tempEggColor, radix: 16)),
+                    )),
+              ),
+              if (showEggColorDialog)
+                Container(
+                    height: 70,
+                    padding: EdgeInsets.all(10.0),
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 10,
+                    ),
+                    decoration: BoxDecoration(
+                        color: Colors.white12,
+                        borderRadius: BorderRadius.circular(15)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(
+                          SnackAndAggColors.colors.length,
+                          (index) => GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    tempEggColor =
+                                        SnackAndAggColors.colors[index];
+                                    showEggColorDialog = false;
+                                  });
+                                },
+                                child: Container(
+                                  width: 20,
+                                  height: 20,
+                                  color: Color(int.parse(
+                                      SnackAndAggColors.colors[index],
+                                      radix: 16)),
+                                ),
+                              )),
+                    )),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    showSpeedDialog = !showSpeedDialog;
+                  });
+                },
+                child: SettingsTile(
+                  text: 'Speed',
+                  widget: Text(
+                    speed.toString(),
+                    style: GoogleFonts.aBeeZee(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2.0),
+                  ),
+                ),
+              ),
+              if (showSpeedDialog)
+                Container(
+                    height: 70,
+                    padding: EdgeInsets.all(10.0),
+                    margin: EdgeInsets.symmetric(
+                      horizontal: 10,
+                    ),
+                    decoration: BoxDecoration(
+                        color: Colors.white12,
+                        borderRadius: BorderRadius.circular(15)),
+                    child: Slider(
+                      onChanged: (value) {
+                        setState(() {
+                          speed = value.round();
+                        });
+                      },
+                      value: speed.toDouble(),
+                      activeColor: Colors.white,
+                      inactiveColor: Colors.white12,
+                      min: 1.0,
+                      max: 100.0,
+                    )),
+              SettingsTile(
+                text: 'Sound',
+                padding: EdgeInsets.only(left: 10.0, top: 0, bottom: 0),
+                widget: Switch(
+                  value: sound,
+                  activeColor: Colors.white,
+                  inactiveTrackColor: Colors.white12,
+                  onChanged: (value) {
+                    setState(() {
+                      sound = !sound;
+                    });
+                  },
+                ),
+              ),
+              SettingsTile(
+                text: 'Lines',
+                padding: EdgeInsets.only(left: 10.0, top: 0, bottom: 0),
+                widget: Switch(
+                  value: showLines,
+                  activeColor: Colors.white,
+                  inactiveTrackColor: Colors.white12,
+                  onChanged: (value) {
+                    setState(() {
+                      showLines = !showLines;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ));
   }
 }

@@ -13,5 +13,11 @@ class DataBaseConstants {
   static const date = 'date';
   static const scoreTable = 'scoreTable';
   static final dateFormat = new DateFormat("h:mm a d-M-yyyy");
+  static const settingsTable = 'settings';
+  static const snackColor = 'snackColor';
+  static const eggColor = 'eggColor';
+  static const speed = 'speed';
+  static const sound = 'sound';
+  static const showLines = 'showLines';
 
 }

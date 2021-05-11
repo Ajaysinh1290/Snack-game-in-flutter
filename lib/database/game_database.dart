@@ -38,5 +38,14 @@ class GameDatabase {
       ${DataBaseConstants.dx} INTEGER NOT NULL,
       ${DataBaseConstants.dy} INTEGER NOT NULL )
       ''');
+    db.execute('''
+      CREATE TABLE ${DataBaseConstants.settingsTable} (
+       ${DataBaseConstants.columnId} INTEGER PRIMARY KEY,
+      ${DataBaseConstants.snackColor} TEXT,
+      ${DataBaseConstants.eggColor} TEXT,
+      ${DataBaseConstants.speed} INTEGER NOT NULL,
+      ${DataBaseConstants.sound} INTEGER NOT NULL,
+      ${DataBaseConstants.showLines} INTEGER NOT NULL )
+      ''');
   }
 }
