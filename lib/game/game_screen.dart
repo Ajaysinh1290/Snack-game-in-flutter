@@ -30,6 +30,7 @@ class _GameScreenState extends State<GameScreen>
   bool right = true;
   bool up = false;
   bool down = false;
+  bool gameOver = false;
   bool isVariableInit = false;
   int drawNewAggTime = 0;
   int snackHeadX = 0;
@@ -197,6 +198,7 @@ class _GameScreenState extends State<GameScreen>
         isPaused = true;
       });
       storeScore();
+      gameOver = true;
       showGameOverDialog(context);
 
       return;
@@ -243,7 +245,6 @@ class _GameScreenState extends State<GameScreen>
     yPoints.removeLast();
 
     if (drawNewAggTime == 0) {
-      print('new agg located');
       drawNewAgg();
     }
   }
@@ -339,29 +340,35 @@ class _GameScreenState extends State<GameScreen>
         barrierColor: Colors.transparent,
         context: context,
         builder: (context) {
-          return AlertDialog(
-            elevation: 0,
-            title: Text(
-              'Game Over',
-              style: TextStyle(fontSize: 30),
+          return WillPopScope(
+            onWillPop: () async{
+              return false;
+            },
+            child: AlertDialog(
+              elevation: 0,
+              title: Text(
+                'Game Over',
+                style: TextStyle(fontSize: 30),
+              ),
+              actions: [
+                RaisedButton(
+                  color: Colors.yellow,
+                  onPressed: () {
+                    gameOver = false;
+                    snackLocations.clear();
+                    snackHeadX = 0;
+                    snackHeadY = 0;
+                    snackLocations.add(
+                        Offset(snackHeadX.toDouble(), snackHeadY.toDouble()));
+                    score = 0;
+                    isPaused = true;
+                    drawNewAgg();
+                    Navigator.pop(context);
+                  },
+                  child: Text('Ok'),
+                )
+              ],
             ),
-            actions: [
-              RaisedButton(
-                color: Colors.yellow,
-                onPressed: () {
-                  snackLocations.clear();
-                  snackHeadX = 0;
-                  snackHeadY = 0;
-                  snackLocations.add(
-                      Offset(snackHeadX.toDouble(), snackHeadY.toDouble()));
-                  score = 0;
-                  isPaused = true;
-                  drawNewAgg();
-                  Navigator.pop(context);
-                },
-                child: Text('Ok'),
-              )
-            ],
           );
         });
   }
@@ -371,6 +378,9 @@ class _GameScreenState extends State<GameScreen>
     width = MediaQuery.of(context).size.width;
     height = MediaQuery.of(context).size.height;
 
+    if(gameOver) {
+
+    }
     checkNewAggTime();
     if (!isVariableInit) {
       initVariables();
@@ -380,9 +390,9 @@ class _GameScreenState extends State<GameScreen>
       child: Scaffold(
         backgroundColor: ColorPallette.canvasColor,
         body: Column(
+
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            SizedBox(height: 5,),
             Container(
               decoration: BoxDecoration(
                 color: ColorPallette.canvasColor,

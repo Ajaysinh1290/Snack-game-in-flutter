@@ -3,7 +3,7 @@
 
     <uses-permission android:name="android.permission.INTERENET"/>
    <application
-        android:label="snack_game"
+        android:label="Snack Game"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
